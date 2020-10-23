@@ -46,6 +46,11 @@ sensors_to_icons = {
     'sensor.speedometer':       'carla_speedometer'
 }
 
+HACK_FOR_LBC = os.environ.get('HACK_FOR_LBC', 0)
+
+if HACK_FOR_LBC:
+    sensors_to_icons['sensor.camera.semantic_segmentation'] = 'carla_camera'
+
 
 class LeaderboardEvaluator(object):
 

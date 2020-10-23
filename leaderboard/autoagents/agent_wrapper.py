@@ -32,6 +32,8 @@ SENSORS_LIMITS = {
     'sensor.speedometer': 1
 }
 
+HACK_FOR_LBC = os.environ.get('HACK_FOR_LBC', 0)
+
 
 class AgentError(Exception):
     """
@@ -58,6 +60,9 @@ class AgentWrapper(object):
         'sensor.other.gnss',
         'sensor.other.imu'
     ]
+
+    if HACK_FOR_LBC:
+        allowed_sensors += ['sensor.camera.semantic_segmentation']
 
     _agent = None
     _sensors_list = []
@@ -93,7 +98,17 @@ class AgentWrapper(object):
             # These are the sensors spawned on the carla world
             else:
                 bp = bp_library.find(str(sensor_spec['type']))
-                if sensor_spec['type'].startswith('sensor.camera'):
+                if HACK_FOR_LBC and sensor_spec['type'].startswith('sensor.camera.semantic_segmentation'):
+                    bp.set_attribute('image_size_x', str(sensor_spec['width']))
+                    bp.set_attribute('image_size_y', str(sensor_spec['height']))
+                    bp.set_attribute('fov', str(sensor_spec['fov']))
+                    bp.set_attribute('lens_circle_multiplier', str(1.0))
+                    bp.set_attribute('lens_circle_falloff', str(10.0))
+                    bp.set_attribute('lens_x_size', str(0.00001))
+                    bp.set_attribute('lens_x_size', str(0.00001))
+                    sensor_location = carla.Location(x=sensor_spec['x'], y=sensor_spec['y'], z=sensor_spec['z'])
+                    sensor_rotation = carla.Rotation(pitch=sensor_spec['pitch'], roll=sensor_spec['roll'], yaw=sensor_spec['yaw'])
+                elif sensor_spec['type'].startswith('sensor.camera'):
                     bp.set_attribute('image_size_x', str(sensor_spec['width']))
                     bp.set_attribute('image_size_y', str(sensor_spec['height']))
                     bp.set_attribute('fov', str(sensor_spec['fov']))
@@ -143,6 +158,11 @@ class AgentWrapper(object):
                     bp.set_attribute('noise_alt_bias', str(0.0))
                     bp.set_attribute('noise_lat_bias', str(0.0))
                     bp.set_attribute('noise_lon_bias', str(0.0))
+
+                    if HACK_FOR_LBC:
+                        bp.set_attribute('noise_alt_stddev', str(0.0))
+                        bp.set_attribute('noise_lat_stddev', str(0.0))
+                        bp.set_attribute('noise_lon_stddev', str(0.0))
 
                     sensor_location = carla.Location(x=sensor_spec['x'],
                                                      y=sensor_spec['y'],
@@ -206,7 +226,7 @@ class AgentWrapper(object):
 
             # Check the extrinsics of the sensor
             if 'x' in sensor and 'y' in sensor and 'z' in sensor:
-                if math.sqrt(sensor['x']**2 + sensor['y']**2 + sensor['z']**2) > MAX_ALLOWED_RADIUS_SENSOR:
+                if not HACK_FOR_LBC and math.sqrt(sensor['x']**2 + sensor['y']**2 + sensor['z']**2) > MAX_ALLOWED_RADIUS_SENSOR:
                     raise SensorConfigurationInvalid(
                         "Illegal sensor extrinsics used for Track [{}]!".format(agent_track))
 
