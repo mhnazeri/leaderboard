@@ -10,7 +10,7 @@ import carla
 from PIL import Image, ImageDraw
 
 from carla_project.src.common import CONVERTER, COLOR
-from team_code.map_agent import MapAgent
+from team_code.base_agent import BaseAgent
 from team_code.pid_controller import PIDController
 
 
@@ -74,7 +74,7 @@ def get_collision(p1, v1, p2, v2):
     return collides, p1 + x[0] * v1
 
 
-class AutoPilot(MapAgent):
+class AutoPilot(BaseAgent):
     def setup(self, path_to_conf_file):
         super().setup(path_to_conf_file)
 
@@ -91,9 +91,7 @@ class AutoPilot(MapAgent):
             self.save_path.mkdir(exist_ok=False)
 
             (self.save_path / 'rgb').mkdir()
-            (self.save_path / 'rgb_left').mkdir()
-            (self.save_path / 'rgb_right').mkdir()
-            (self.save_path / 'topdown').mkdir()
+            (self.save_path / 'seg').mkdir()
             (self.save_path / 'measurements').mkdir()
 
     def _init(self):
@@ -159,22 +157,21 @@ class AutoPilot(MapAgent):
             self._world.set_weather(WEATHERS[index])
 
         data = self.tick(input_data)
-        topdown = data['topdown']
-        rgb = np.hstack((data['rgb_left'], data['rgb'], data['rgb_right']))
+        seg = data['seg']
+        rgb = data['rgb']
 
         gps = self._get_position(data)
 
         near_node, near_command = self._waypoint_planner.run_step(gps)
         far_node, far_command = self._command_planner.run_step(gps)
 
-        _topdown = Image.fromarray(COLOR[CONVERTER[topdown]])
         _rgb = Image.fromarray(rgb)
-        _draw = ImageDraw.Draw(_topdown)
+        _seg = Image.fromarray(seg)
 
-        _topdown.thumbnail((256, 256))
+        _seg.thumbnail((256, 256))
         _rgb = _rgb.resize((int(256 / _rgb.size[1] * _rgb.size[0]), 256))
 
-        _combined = Image.fromarray(np.hstack((_rgb, _topdown)))
+        _combined = Image.fromarray(np.hstack((_rgb, _seg)))
         _draw = ImageDraw.Draw(_combined)
 
         steer, throttle, brake, target_speed = self._get_control(near_node, far_node, data, _draw)
@@ -222,9 +219,7 @@ class AutoPilot(MapAgent):
         (self.save_path / 'measurements' / ('%04d.json' % frame)).write_text(str(data))
 
         Image.fromarray(tick_data['rgb']).save(self.save_path / 'rgb' / ('%04d.png' % frame))
-        Image.fromarray(tick_data['rgb_left']).save(self.save_path / 'rgb_left' / ('%04d.png' % frame))
-        Image.fromarray(tick_data['rgb_right']).save(self.save_path / 'rgb_right' / ('%04d.png' % frame))
-        Image.fromarray(tick_data['topdown']).save(self.save_path / 'topdown' / ('%04d.png' % frame))
+        Image.fromarray(tick_data['seg']).save(self.save_path / 'seg' / ('%04d.png' % frame))
 
     def _should_brake(self):
         actors = self._world.get_actors()
