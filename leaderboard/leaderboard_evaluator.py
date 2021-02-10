@@ -21,6 +21,8 @@ import importlib
 import os
 import pkg_resources
 import sys
+import torchvision
+
 import carla
 import signal
 
@@ -37,6 +39,7 @@ from leaderboard.utils.route_indexer import RouteIndexer
 
 
 sensors_to_icons = {
+    'sensor.camera.semantic_segmentation':        'carla_camera',
     'sensor.camera.rgb':        'carla_camera',
     'sensor.lidar.ray_cast':    'carla_lidar',
     'sensor.other.radar':       'carla_radar',
