@@ -171,7 +171,7 @@ class AutoPilot(BaseAgent):
         _seg.thumbnail((256, 256))
         _rgb = _rgb.resize((int(256 / _rgb.size[1] * _rgb.size[0]), 256))
 
-        _combined = Image.fromarray(np.hstack((_rgb, _seg)))
+        _combined = Image.fromarray(_rgb)
         _draw = ImageDraw.Draw(_combined)
 
         steer, throttle, brake, target_speed = self._get_control(near_node, far_node, data, _draw)
@@ -181,9 +181,9 @@ class AutoPilot(BaseAgent):
         _draw.text((5, 50), 'Throttle: %.3f' % throttle)
         _draw.text((5, 70), 'Brake: %s' % brake)
 
-        if HAS_DISPLAY:
-            cv2.imshow('map', cv2.cvtColor(np.array(_combined), cv2.COLOR_BGR2RGB))
-            cv2.waitKey(1)
+        # if HAS_DISPLAY:
+        #     cv2.imshow('map', cv2.cvtColor(np.array(_combined), cv2.COLOR_BGR2RGB))
+        #     cv2.waitKey(1)
 
         control = carla.VehicleControl()
         control.steer = steer + 1e-2 * np.random.randn()
