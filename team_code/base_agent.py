@@ -84,7 +84,7 @@ class BaseAgent(autonomous_agent.AutonomousAgent):
         self._traffic_lights = get_nearby_lights(self._vehicle, self._actors.filter('*traffic_light*'))
 
         rgb = cv2.cvtColor(input_data['rgb'][1][:, :, :3], cv2.COLOR_BGR2RGB)
-        seg = cv2.cvtColor(input_data['seg'][1][:, :, :3], cv2.COLOR_BGR2RGB)
+        seg = cv2.cvtColor(input_data['seg'][1][:, :, :3], cv2.COLOR_BGR2RGB)[..., 0:1] #just save red channel
         gps = input_data['gps'][1][:2]
         speed = input_data['speed'][1]['speed']
         compass = input_data['imu'][1][-1]
