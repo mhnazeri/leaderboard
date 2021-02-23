@@ -91,7 +91,7 @@ class AutoPilot(BaseAgent):
             self.save_path.mkdir(exist_ok=False)
 
             (self.save_path / 'rgb').mkdir()
-            (self.save_path / 'seg').mkdir()
+            (self.save_path / 'mask').mkdir()
             (self.save_path / 'measurements').mkdir()
 
     def _init(self):
@@ -157,7 +157,7 @@ class AutoPilot(BaseAgent):
             self._world.set_weather(WEATHERS[index])
 
         data = self.tick(input_data)
-        seg = data['seg']
+        seg = data['mask']
         rgb = data['rgb']
 
         gps = self._get_position(data)
@@ -219,7 +219,7 @@ class AutoPilot(BaseAgent):
         (self.save_path / 'measurements' / ('%04d.json' % frame)).write_text(str(data))
 
         Image.fromarray(tick_data['rgb']).save(self.save_path / 'rgb' / ('%04d.png' % frame))
-        Image.fromarray(tick_data['seg']).save(self.save_path / 'seg' / ('%04d.png' % frame))
+        Image.fromarray(tick_data['mask']).save(self.save_path / 'mask' / ('%04d.png' % frame))
 
     def _should_brake(self):
         actors = self._world.get_actors()

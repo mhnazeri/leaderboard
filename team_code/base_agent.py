@@ -91,7 +91,7 @@ class BaseAgent(autonomous_agent.AutonomousAgent):
 
         return {
                 'rgb': rgb,
-                'seg': seg,
+                'mask': seg,
                 'gps': gps,
                 'speed': speed,
                 'compass': compass
