@@ -191,7 +191,7 @@ class AutoPilot(BaseAgent):
         control.brake = float(brake)
 
         if self.step % 10 == 0:
-            self.save(far_node, near_command, steer, throttle, brake, target_speed, data)
+            self.save(far_node, near_command, steer, throttle, float(brake), target_speed, data)
 
         return control
 
