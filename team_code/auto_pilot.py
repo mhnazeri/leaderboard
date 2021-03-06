@@ -203,17 +203,17 @@ class AutoPilot(BaseAgent):
         speed = tick_data['speed']
 
         data = {
-                'x': pos[0],
-                'y': pos[1],
-                'theta': theta,
-                'speed': speed,
-                'target_speed': target_speed,
-                'x_command': far_node[0],
-                'y_command': far_node[1],
-                'command': near_command.value,
-                'steer': steer,
-                'throttle': throttle,
-                'brake': brake,
+                "x": pos[0],
+                "y": pos[1],
+                "theta": theta,
+                "speed": speed,
+                "target_speed": target_speed,
+                "x_command": far_node[0],
+                "y_command": far_node[1],
+                "command": near_command.value,
+                "steer": steer,
+                "throttle": throttle,
+                "brake": brake,
                 }
 
         (self.save_path / 'measurements' / ('%04d.json' % frame)).write_text(str(data))
