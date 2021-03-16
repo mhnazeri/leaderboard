@@ -9,6 +9,10 @@ from team_code.planner import RoutePlanner
 from carla_project.src.carla_env import get_nearby_lights
 
 
+# image resolution
+WIDTH, HEIGHT = 800, 600
+
+
 class BaseAgent(autonomous_agent.AutonomousAgent):
     def setup(self, path_to_conf_file):
         self.track = autonomous_agent.Track.SENSORS
@@ -47,15 +51,29 @@ class BaseAgent(autonomous_agent.AutonomousAgent):
                     'type': 'sensor.camera.rgb',
                     'x': 1.3, 'y': 0.0, 'z': 1.3,
                     'roll': 0.0, 'pitch': 0.0, 'yaw': 0.0,
-                    'width': 256, 'height': 144, 'fov': 90,
+                    'width': WIDTH, 'height': HEIGHT, 'fov': 90,
                     'id': 'rgb'
+                    },
+                {
+                    'type': 'sensor.camera.rgb',
+                    'x': 1.2, 'y': -0.25, 'z': 1.3,
+                    'roll': 0.0, 'pitch': 0.0, 'yaw': -45.0,
+                    'width': WIDTH, 'height': HEIGHT, 'fov': 90,
+                    'id': 'rgb_left'
+                    },
+                {
+                    'type': 'sensor.camera.rgb',
+                    'x': 1.2, 'y': 0.25, 'z': 1.3,
+                    'roll': 0.0, 'pitch': 0.0, 'yaw': 45.0,
+                    'width': WIDTH, 'height': HEIGHT, 'fov': 90,
+                    'id': 'rgb_right'
                     },
                 {
                     'type': 'sensor.camera.semantic_segmentation',
                     'x': 1.3, 'y': 0.0, 'z': 1.3,
                     'roll': 0.0, 'pitch': 0.0, 'yaw': 0.0,
-                    'width': 256, 'height': 144, 'fov': 90,
-                    'id': 'seg'
+                    'width': WIDTH, 'height': HEIGHT, 'fov': 90,
+                    'id': 'mask'
                     },
                 {
                     'type': 'sensor.other.imu',
@@ -84,14 +102,18 @@ class BaseAgent(autonomous_agent.AutonomousAgent):
         self._traffic_lights = get_nearby_lights(self._vehicle, self._actors.filter('*traffic_light*'))
 
         rgb = cv2.cvtColor(input_data['rgb'][1][:, :, :3], cv2.COLOR_BGR2RGB)
-        seg = cv2.cvtColor(input_data['seg'][1][:, :, :3], cv2.COLOR_BGR2RGB)[..., 0:1] #just save red channel
+        rgb_left = cv2.cvtColor(input_data['rgb_left'][1][:, :, :3], cv2.COLOR_BGR2RGB)
+        rgb_right = cv2.cvtColor(input_data['rgb_right'][1][:, :, :3], cv2.COLOR_BGR2RGB)
+        mask = cv2.cvtColor(input_data['mask'][1][:, :, :3], cv2.COLOR_BGR2RGB)[..., 0:1] #just save red channel
         gps = input_data['gps'][1][:2]
         speed = input_data['speed'][1]['speed']
         compass = input_data['imu'][1][-1]
 
         return {
                 'rgb': rgb,
-                'mask': seg,
+                'mask': mask,
+                'rgb_left': rgb_left,
+                'rgb_right': rgb_right,
                 'gps': gps,
                 'speed': speed,
                 'compass': compass

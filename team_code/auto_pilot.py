@@ -14,7 +14,7 @@ from team_code.base_agent import BaseAgent
 from team_code.pid_controller import PIDController
 
 
-HAS_DISPLAY = True
+HAS_DISPLAY = False
 DEBUG = False
 WEATHERS = [
         carla.WeatherParameters.ClearNoon,
@@ -92,6 +92,8 @@ class AutoPilot(BaseAgent):
 
             (self.save_path / 'rgb').mkdir()
             (self.save_path / 'mask').mkdir()
+            (self.save_path / 'rgb_left').mkdir()
+            (self.save_path / 'rgb_right').mkdir()
             (self.save_path / 'measurements').mkdir()
 
     def _init(self):
@@ -220,6 +222,8 @@ class AutoPilot(BaseAgent):
 
         Image.fromarray(tick_data['rgb']).save(self.save_path / 'rgb' / ('%04d.png' % frame))
         Image.fromarray(tick_data['mask']).save(self.save_path / 'mask' / ('%04d.png' % frame))
+        Image.fromarray(tick_data['rgb_left']).save(self.save_path / 'rgb_left' / ('%04d.png' % frame))
+        Image.fromarray(tick_data['rgb_right']).save(self.save_path / 'rgb_right' / ('%04d.png' % frame))
 
     def _should_brake(self):
         actors = self._world.get_actors()
